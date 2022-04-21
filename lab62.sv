@@ -68,9 +68,9 @@ logic Reset_h, vssig, blank, sync, VGA_Clk;
 	logic [3:0] hex_num_4, hex_num_3, hex_num_1, hex_num_0; //4 bit input hex digits
 	logic [1:0] signs;
 	logic [1:0] hundreds;
-	logic [9:0] drawxsig, drawysig, ballxsig, ballysig, ballsizesig;
+	logic [9:0] drawxsig, drawysig, ballxsig, ballysig, ballsizesigx, ballsizesigy;
 	logic [7:0] Red, Blue, Green;
-	logic [7:0] keycode;
+	logic [7:0] keycode, keycode1;
 
 //=======================================================
 //  Structural coding
@@ -155,21 +155,49 @@ logic Reset_h, vssig, blank, sync, VGA_Clk;
 		//LEDs and HEX
 		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0}),
 		.leds_export({hundreds, signs, LEDR}),
-		.keycode_export(keycode)
+		.keycode_export(keycode),
+		.keycode1_export(keycode1)
 		
 	 );
 	 
+	 
+logic [3:0] data_in, ram_data_mario, ram_data_bg, data_in_bg, data_in_brick, ram_data_brick;
+logic [18:0] WRITE_ADDR;
+logic [18:0] WRITE_ADDR_BG, WRITE_ADDR_BRICK;
+logic WE;
+logic [7:0] red_mariodata, green_mariodata, blue_mariodata, blue_bg, red_bg, green_bg, blue_brick, green_brick, red_brick;
+logic [5:0] logx;
 
 
 //instantiate a vga_controller, ball, and color_mapper here with the ports.
-ball Ball0 (.Reset (Reset_h), .frame_clk(VGA_VS), .keycode(keycode),
- .BallX(ballxsig), .BallY (ballysig), .BallS(ballsizesig) );
+ball Ball0 (.Reset (Reset_h), .frame_clk(VGA_VS), .keycode(keycode), .keycode1(keycode1),
+ .BallX(ballxsig), .BallY (ballysig), .BallSX(ballsizesigx), .BallSY(ballsizesigy), .logx(logx));
 					
-color_mapper color (.BallX (ballxsig), .BallY (ballysig), .DrawX (drawxsig), .DrawY (drawysig), .Ball_size (ballsizesig),
- .*);
+color_mapper color (.BallX (ballxsig), .BallY (ballysig), .DrawX (drawxsig), .DrawY (drawysig), .Ball_size_X (ballsizesigx), .Ball_size_Y(ballsizesigy),
+ .green_mariodata(green_mariodata), .blue_mariodata(blue_mariodata), .red_mariodata(red_mariodata), .red_bgdata(red_bg), .blue_bgdata(blue_bg), .green_bgdata(green_bg), 
+ .red_brickdata(red_brick), .green_brickdata(green_brick), .blue_brickdata(blue_brick), .*);
 
 							  
 vga_controller vga(.Clk (MAX10_CLK1_50), .Reset(Reset_h), .hs(VGA_HS), .vs (VGA_VS), .pixel_clk(VGA_Clk), .blank (blank), .sync(sync), 
 .DrawX(drawxsig), .DrawY(drawysig) ); 
+
+// check the width and height of the read_addr
+marioRAM mario_sprite(.data_in(data_in), .WRITE_ADDR(WRITE_ADDR), 
+							.READ_ADDR((drawxsig-ballxsig-15)+ (drawysig-ballysig-30)*20), 
+							.WE(WE), .CLK(VGA_Clk), .data_out(ram_data_mario));
+							
+color_palette_mario mario_colored (.data_in(ram_data_mario), .red_mariodata(red_mariodata), .green_mariodata(green_mariodata), .blue_mariodata(blue_mariodata));
+
+backgroundRAM bg(.data_in(data_in_bg), .WRITE_ADDR(WRITE_ADDR_BG), 
+						.READ_ADDR(logx + drawxsig+(drawysig)*700) , .WE(WE), 
+						.CLK(VGA_Clk), .data_out(ram_data_bg));
+						
+background_color_palette  bg_colored (.data_in(ram_data_bg), .red_bgdata(red_bg), .green_bgdata(green_bg), .blue_bgdata(blue_bg));
+
+brickRAM brick(.data_in(data_in_brick), .WRITE_ADDR(WRITE_ADDR_BRICK),
+					.READ_ADDR((logx + drawxsig - 230) +(drawysig - 250)*90) , .WE(WE), 
+					.CLK(VGA_Clk), .data_out(ram_data_brick));
+					
+color_palette_brick  brick_colored (.data_in(ram_data_brick), .red_brickdata(red_brick), .green_brickdata(green_brick), .blue_brickdata(blue_brick));
 
 endmodule
