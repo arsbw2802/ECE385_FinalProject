@@ -434,6 +434,26 @@ set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -
 set_location_assignment PIN_V22 -to DRAM_LDQM
 set_location_assignment PIN_J21 -to DRAM_UDQM
 set_location_assignment PIN_P11 -to MAX10_CLK1_50
+set_global_assignment -name FLOW_ENABLE_POWER_ANALYZER ON
+set_global_assignment -name POWER_DEFAULT_INPUT_IO_TOGGLE_RATE "12.5 %"
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name TEXT_FILE "mario-jump3_pink.txt"
+set_global_assignment -name TEXT_FILE "mario-jump2_pink.txt"
+set_global_assignment -name TEXT_FILE gommba_new_3.txt
+set_global_assignment -name TEXT_FILE goomba_new_2.txt
+set_global_assignment -name TEXT_FILE goomba_new1.txt
+set_global_assignment -name TEXT_FILE pipe_small.txt
+set_global_assignment -name TEXT_FILE pipe_long.txt
+set_global_assignment -name TEXT_FILE background_1280x640.txt
+set_global_assignment -name TEXT_FILE brick_blocks_pink.txt
+set_global_assignment -name TEXT_FILE goomba.txt
+set_global_assignment -name TEXT_FILE coin.txt
+set_global_assignment -name TEXT_FILE background_700x480.txt
+set_global_assignment -name TEXT_FILE background_640x480.txt
+set_global_assignment -name TEXT_FILE background_2560x480.txt
+set_global_assignment -name TEXT_FILE "mario-jump_pink.txt"
 set_global_assignment -name QIP_FILE lab6_1_soc/synthesis/lab6_1_soc.qip
 set_global_assignment -name SYSTEMVERILOG_FILE lab6_1.sv
 set_global_assignment -name SYSTEMVERILOG_FILE VGA_controller.sv
@@ -443,9 +463,20 @@ set_global_assignment -name SYSTEMVERILOG_FILE Color_Mapper.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ball.sv
 set_global_assignment -name QIP_FILE lab62_soc/synthesis/lab62_soc.qip
 set_global_assignment -name SDC_FILE lab6.sdc
-set_global_assignment -name FLOW_ENABLE_POWER_ANALYZER ON
-set_global_assignment -name POWER_DEFAULT_INPUT_IO_TOGGLE_RATE "12.5 %"
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name SYSTEMVERILOG_FILE frame_ram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE mario_ram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE colorpalette_mario.sv
+set_global_assignment -name SYSTEMVERILOG_FILE colorpalette_bg.sv
+set_global_assignment -name SYSTEMVERILOG_FILE colorpalette_coin.sv
+set_global_assignment -name SYSTEMVERILOG_FILE collision_detection.sv
+set_global_assignment -name SYSTEMVERILOG_FILE address_detection.sv
+set_global_assignment -name SYSTEMVERILOG_FILE coin_ram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE font_rom.sv
+set_global_assignment -name SYSTEMVERILOG_FILE goombaram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE colorpalette_goomba.sv
+set_global_assignment -name SYSTEMVERILOG_FILE longpipe_ram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE shortpipe_ram.sv
+set_global_assignment -name SYSTEMVERILOG_FILE colorpalette_lpipe.sv
+set_global_assignment -name SYSTEMVERILOG_FILE colorpalette_smallpipe.sv
+set_global_assignment -name SYSTEMVERILOG_FILE mario_frame_selector.sv
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -1,6 +1,6 @@
-module color_palette_brick (input [3:0] data_in, 
+module color_palette_longpipe (input [3:0] data_in, 
 
-output [7:0] red_brickdata, green_brickdata, blue_brickdata);
+output [7:0] red_lpipedata, green_lpipedata, blue_lpipedata);
 
 logic [7:0] tempRed, tempGreen, tempBlue;
 	assign red_brickdata = tempRed;

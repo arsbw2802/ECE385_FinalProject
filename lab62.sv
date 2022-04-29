@@ -161,21 +161,33 @@ logic Reset_h, vssig, blank, sync, VGA_Clk;
 	 );
 	 
 	 
-logic [3:0] data_in, ram_data_mario, ram_data_bg, data_in_bg, data_in_brick, ram_data_brick;
+logic [3:0] data_in, ram_data_mario, ram_data_bg, data_in_bg, data_in_lpipe, ram_data_lpipe,
+data_in_smallpipe, ram_data_smallpipe, data_in_coin, ram_data_coin, data_in_goomba, ram_data_goomba;
 logic [18:0] WRITE_ADDR;
-logic [18:0] WRITE_ADDR_BG, WRITE_ADDR_BRICK;
-logic WE;
-logic [7:0] red_mariodata, green_mariodata, blue_mariodata, blue_bg, red_bg, green_bg, blue_brick, green_brick, red_brick;
+logic [18:0] WRITE_ADDR_BG, WRITE_ADDR_PIPE_L, WRITE_ADDR_COIN, WRITE_ADDR_SMALL_PIPE, coin_address, mario_address,
+ WRITE_ADDR_GOOMBA;
+logic WE, coin1_detect, coin2_detect, coin3_detect, goomba1_detect1, goomba1_detect2, score_addedc1, score_addedc2, score_addedc3, 
+score_addedg1, flag_change_frame;
+logic [1:0] set_parabola;
+logic [7:0] red_mariodata, green_mariodata, blue_mariodata, blue_bg, red_bg, green_bg, 
+blue_lpipe, green_lpipe, red_lpipe, red_coin, green_coin, blue_coin, red_spipe, green_spipe, blue_spipe,
+red_goomba, green_goomba, blue_goomba ;
+logic [9:0] score, increment, frame_number_temp;
 logic [5:0] logx;
 
+// assign score = 0;
 
 //instantiate a vga_controller, ball, and color_mapper here with the ports.
 ball Ball0 (.Reset (Reset_h), .frame_clk(VGA_VS), .keycode(keycode), .keycode1(keycode1),
- .BallX(ballxsig), .BallY (ballysig), .BallSX(ballsizesigx), .BallSY(ballsizesigy), .logx(logx));
+ .BallX(ballxsig), .BallY (ballysig), .BallSX(ballsizesigx), .BallSY(ballsizesigy), .logx(logx), .flag_set(flag_change_frame),
+ .set_parabola(set_parabola));
 					
 color_mapper color (.BallX (ballxsig), .BallY (ballysig), .DrawX (drawxsig), .DrawY (drawysig), .Ball_size_X (ballsizesigx), .Ball_size_Y(ballsizesigy),
- .green_mariodata(green_mariodata), .blue_mariodata(blue_mariodata), .red_mariodata(red_mariodata), .red_bgdata(red_bg), .blue_bgdata(blue_bg), .green_bgdata(green_bg), 
- .red_brickdata(red_brick), .green_brickdata(green_brick), .blue_brickdata(blue_brick), .*);
+ .green_mariodata(green_mariodata), .blue_mariodata(blue_mariodata), .red_mariodata(red_mariodata), .red_bgdata(8'hfa), .blue_bgdata(8'hff), .green_bgdata(8'he6), 
+ .red_lpipedata(red_lpipe), .green_lpipedata(green_lpipe), .blue_lpipedata(blue_lpipe), .red_coindata(red_coin), .green_coindata(green_coin),
+.blue_coindata(blue_coin), .is_coin1_detect(coin1_detect), .is_coin2_detect(coin2_detect), .is_coin3_detect(coin3_detect), .is_goomba1_d1(goomba1_detect1), .score(score), 
+.red_spipedata(red_spipe), .green_spipedata(green_spipe), .blue_spipedata(blue_spipe), .red_goombadata(red_goomba), .green_goombadata(green_goomba),
+.blue_goombadata(blue_goomba), .*);
 
 							  
 vga_controller vga(.Clk (MAX10_CLK1_50), .Reset(Reset_h), .hs(VGA_HS), .vs (VGA_VS), .pixel_clk(VGA_Clk), .blank (blank), .sync(sync), 
@@ -183,21 +195,101 @@ vga_controller vga(.Clk (MAX10_CLK1_50), .Reset(Reset_h), .hs(VGA_HS), .vs (VGA_
 
 // check the width and height of the read_addr
 marioRAM mario_sprite(.data_in(data_in), .WRITE_ADDR(WRITE_ADDR), 
-							.READ_ADDR((drawxsig-ballxsig-15)+ (drawysig-ballysig-30)*20), 
+							.READ_ADDR(mario_address), 
 							.WE(WE), .CLK(VGA_Clk), .data_out(ram_data_mario));
 							
 color_palette_mario mario_colored (.data_in(ram_data_mario), .red_mariodata(red_mariodata), .green_mariodata(green_mariodata), .blue_mariodata(blue_mariodata));
 
-backgroundRAM bg(.data_in(data_in_bg), .WRITE_ADDR(WRITE_ADDR_BG), 
-						.READ_ADDR(logx + drawxsig+(drawysig)*700) , .WE(WE), 
-						.CLK(VGA_Clk), .data_out(ram_data_bg));
-						
-background_color_palette  bg_colored (.data_in(ram_data_bg), .red_bgdata(red_bg), .green_bgdata(green_bg), .blue_bgdata(blue_bg));
 
-brickRAM brick(.data_in(data_in_brick), .WRITE_ADDR(WRITE_ADDR_BRICK),
-					.READ_ADDR((logx + drawxsig - 230) +(drawysig - 250)*90) , .WE(WE), 
-					.CLK(VGA_Clk), .data_out(ram_data_brick));
+frame_address_select mario_address_selector (.*, .frame_number(frame_number_temp[1:0]) , .read_address_mario (mario_address) );
+//backgroundRAM bg(.data_in(data_in_bg), .WRITE_ADDR(WRITE_ADDR_BG), 
+						//.READ_ADDR(logx + drawxsig+(drawysig)*700) , .WE(WE), 
+						//.CLK(VGA_Clk), .data_out(ram_data_bg));
+						
+// background_color_palette  bg_colored (.data_in(ram_data_bg), .red_bgdata(red_bg), .green_bgdata(green_bg), .blue_bgdata(blue_bg));
+
+longpipeRAM longpipe(.data_in(data_in_lpipe), .WRITE_ADDR(WRITE_ADDR_PIPE_L),
+					.READ_ADDR((logx + drawxsig - 255) +(drawysig - 325)*40) , .WE(WE), 
+					.CLK(VGA_Clk), .data_out(ram_data_lpipe));
 					
-color_palette_brick  brick_colored (.data_in(ram_data_brick), .red_brickdata(red_brick), .green_brickdata(green_brick), .blue_brickdata(blue_brick));
+shortpipeRAM smallpipe (.data_in(data_in_smallpipe), .WRITE_ADDR(WRITE_ADDR_SMALL_PIPE), 
+	.READ_ADDR((logx + drawxsig - 215) +(drawysig - 353)*35), .WE(WE), .CLK (VGA_Clk),
+	.data_out(ram_data_smallpipe));
+				
+color_palette_longpipe  lpipe_colored (.data_in(ram_data_lpipe), .red_lpipedata(red_lpipe), .green_lpipedata(green_lpipe), .blue_lpipedata(blue_lpipe));
+
+smallpipe_color_palette   smallpipe_colored (.data_in (ram_data_smallpipe), .red_spipedata (red_spipe), 
+.green_spipedata(green_spipe), .blue_spipedata(blue_spipe));
+
+
+detect_address_coin  address (.currentxpos(drawxsig), .currentypos (drawysig),
+.logx(logx),
+.read_addr (coin_address));
+
+collision_detect collide (.frame_clk (VGA_VS), .reset(Reset_h),
+.currentxpos(ballxsig), .currentypos(ballysig),
+.logx(logx), .coin1_d(coin1_detect), .coin2_d (coin2_detect), .coin3_d (coin3_detect), .goomba1_d1(goomba1_detect1), .goomba1_d2(goomba1_detect2), .increment(increment), 
+.score_addedc1(score_addedc1), .score_addedc2(score_addedc2), .score_addedc3(score_addedc3), .score_addedg1(score_addedg1) );
+
+
+coinRAM coin (.data_in(data_in_coin), .WRITE_ADDR(WRITE_ADDR_COIN),
+					.READ_ADDR(coin_address) , .WE(WE), 
+					.CLK(VGA_Clk), .data_out(ram_data_coin));
+
+color_palette_coin coin_colored (.data_in(ram_data_coin), 
+.red_coindata(red_coin), .green_coindata(green_coin), .blue_coindata(blue_coin));
+
+goombaRAM goomba (.data_in(data_in_goomba), .WRITE_ADDR(WRITE_ADDR_GOOMBA),
+					.READ_ADDR((logx + drawxsig - 400) + (drawysig - 375)*30) , .WE(WE), 
+					.CLK(VGA_Clk), .data_out(ram_data_goomba));
+
+color_palette_goomba goomba_colored (.data_in(ram_data_goomba), 
+.red_goombadata(red_goomba), .green_goombadata(green_goomba), .blue_goombadata(blue_goomba));
+
+
+always_ff @ (posedge VGA_VS or posedge Reset_h)
+begin 
+// updating the address with an output from ball when counter threshold is reached
+	
+	
+	if(Reset_h)
+	begin
+		score <= 10'b0;
+		score_addedc1 <= 0;
+		score_addedc2 <= 0;
+		score_addedc3 <= 0;
+		score_addedg1 <= 0;
+		frame_number_temp <= 0;
+	end
+	
+	else if (set_parabola != 0)
+		frame_number_temp <= frame_number_temp + flag_change_frame;
+	else if(coin1_detect && ~score_addedc1)
+		begin
+		score <= score + increment;
+		score_addedc1 <= 1;
+		end
+	else if (coin2_detect && ~score_addedc2)
+		begin
+		score <= score + increment;
+		score_addedc2 <= 1;
+		end
+	else if (coin3_detect && ~score_addedc3)
+		begin
+		score <= score + increment;
+		score_addedc3 <= 1;
+		end
+	else if ((goomba1_detect1 || goomba1_detect2) && ~score_addedg1)
+		begin
+		score <= score + increment;
+		score_addedg1 <= 1;
+		end
+	
+
+end
+
+
+
+
 
 endmodule

@@ -1,4 +1,4 @@
-odule longpipeRAM (
+module longpipeRAM (
 	input [3:0] data_in, 
 	input [18:0] WRITE_ADDR, READ_ADDR, 
 	input WE, CLK,

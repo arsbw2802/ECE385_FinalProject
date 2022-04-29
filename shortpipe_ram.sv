@@ -1,4 +1,4 @@
-odule longpipeRAM (
+module shortpipeRAM (
 	input [3:0] data_in, 
 	input [18:0] WRITE_ADDR, READ_ADDR, 
 	input WE, CLK,
@@ -6,13 +6,13 @@ odule longpipeRAM (
 	output logic [3:0] data_out);
 	
 	
-logic [3:0] mem [3199:0]; // change the size according to the size of the sprite
+logic [3:0] mem [1749:0]; // change the size according to the size of the sprite
 // x -> 20
 // y -> 40
 
 initial
 begin
-		$readmemh("pipe_long.txt",mem); //filename for the character we want
+		$readmemh("pipe_small.txt",mem); //filename for the character we want
 
 end
 
