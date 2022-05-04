@@ -16,14 +16,16 @@
 module  ball ( input Reset, frame_clk,
 					input [7:0] keycode, keycode1,
                output [9:0]  BallX, BallY, BallSX, BallSY,
-					output [5:0] logx);
+					output [5:0] logx, 
+					output flag_set, 
+					output [1:0] set_parabola);
     
-	 
-	 logic [1:0] set_parabola;
-    logic [9:0] Ball_X_Pos, Ball_X_Motion, Ball_Y_Pos, Ball_Y_Motion, Ball_Size_X, Ball_Size_Y, y_deltadist;
+	 logic brick_bounce;
+	 //logic [1:0] set_parabola;
+    logic [9:0] Ball_X_Pos, Ball_X_Motion, Ball_Y_Pos, Ball_Y_Motion, Ball_Size_X, Ball_Size_Y, y_deltadist, counter;
 	 logic up_on, going_up;
     parameter [9:0] Ball_X_Center = 80;  // Center position on the X axis
-    parameter [9:0] Ball_Y_Center = 378;// Center position on the Y axis
+    parameter [9:0] Ball_Y_Center = 384;// Center position on the Y axis
     parameter [9:0] Ball_X_Min=0;       // Leftmost point on the X axis
     parameter [9:0] Ball_X_Max=699;     // Rightmost point on the X axis
     parameter [9:0] Ball_Y_Min=0;       // Topmost point on the Y axis
@@ -37,6 +39,8 @@ module  ball ( input Reset, frame_clk,
 		assign Ball_Size_Y = 10'd20;
 		// assign set_parabola = 2'b00;
 	
+	
+		// set keycode for both w,d parabolic jump
 		always_comb
 		begin
 			set_parabola = 2'b00;
@@ -74,7 +78,7 @@ module  ball ( input Reset, frame_clk,
 					  //Ball_X_Motion <= 0; 
 					 end
 					  
-				  else if ( (Ball_X_Pos + Ball_Size_X + logx) >= Ball_X_Max )  // Ball is at the Right edge, BOUNCE!
+				  else if ( ((Ball_X_Pos + Ball_Size_X + logx) >= Ball_X_Max)  || (Ball_X_Pos +logx >= 205 && Ball_X_Pos < 250 && Ball_Y_Pos >= 377) || (Ball_X_Pos + logx >= 245 && Ball_X_Pos < 294 && Ball_Y_Pos >= 331) ) // Ball is at the Right edge, BOUNCE!
 					 begin
 					  Ball_X_Motion <= (~ (Ball_X_Step) + 1'b1);  // 2's complement.
 					  //Ball_Y_Motion <= 0; 
@@ -94,34 +98,20 @@ module  ball ( input Reset, frame_clk,
 						
 				 
 				case (set_parabola)
-					/*8'h04 : begin
-								//if (~(Ball_Y_Pos + Ball_Size_Y) >= Ball_Y_Max )
-								//begin
-										Ball_X_Motion <= -1;//A
-										Ball_Y_Motion<= 0;
-								//end
-							  end*/ 
-					        
+										        
 					2'b10 : begin
-								//if (~(Ball_Y_Pos - Ball_Size_Y) <= Ball_Y_Min )
-								//begin
+								
 									Ball_X_Motion <= 1;//D
 									Ball_Y_Motion <= 0;
-								//end
+									counter <= counter + 1;
+								
 							  end
-
-							  
-					/*8'h16 : begin
-							//if (~(Ball_X_Pos + Ball_Size_X) >= Ball_X_Max )
-							//begin
-									Ball_Y_Motion <= 1;//S
-									Ball_X_Motion <= 0;
-							//end
-							end*/ 
 							  
 					2'b01 : begin
 							
+							
 								going_up <= 1;  // up
+								brick_bounce <= 0;
 							 Ball_Y_Motion <= -3;
 							 Ball_X_Motion <= 0;
 
@@ -129,8 +119,10 @@ module  ball ( input Reset, frame_clk,
 							 
 					2'b11: begin
 								going_up <= 1;   //up and right
+								brick_bounce <= 0;
 								Ball_Y_Motion <= -3;
 								Ball_X_Motion <= 1;
+								counter <= counter +1;
 								end
 								
 								
@@ -142,22 +134,47 @@ module  ball ( input Reset, frame_clk,
 			   endcase
 				end
 
-																						
+													
 							// keep this part - jump
-							if(Ball_Y_Pos < 300 ||  (Ball_Y_Pos < 378 && !going_up) )// <
+							if(Ball_Y_Pos < 250 ||  (Ball_Y_Pos < 378 && !going_up && (Ball_X_Pos < 215 || Ball_X_Pos > 295) ))// <
 								begin 
 								Ball_Y_Motion <= 3;
 								going_up <= 0;
 								end
-							else if(!going_up && Ball_Y_Pos > 378) // >
+							else if(Ball_Y_Pos < 250 ||  (Ball_Y_Pos < 332 && !going_up && Ball_X_Pos >= 215 && Ball_X_Pos < 254) )// <
+								begin 
+								Ball_Y_Motion <= 3;
+								going_up <= 0;
+								end
+							else if(Ball_Y_Pos < 250 ||  (Ball_Y_Pos < 304 && !going_up && Ball_X_Pos >= 255 && Ball_X_Pos < 295) )// <
+								begin 
+								Ball_Y_Motion <= 3;
+								going_up <= 0;
+								end
+							else if(!going_up && Ball_Y_Pos > 378 && (Ball_X_Pos < 215 || Ball_X_Pos > 295)) // >
 							begin
 								Ball_Y_Motion <= 0;
 								Ball_Y_Pos <= 378;
 							end
-							else if (Ball_Y_Pos > 300 && (keycode == 8'h07 || keycode1 == 8'h07) && going_up)
+							
+							else if(!going_up && Ball_Y_Pos > 332 && Ball_X_Pos >= 215 && Ball_X_Pos < 254) // >
+							begin
+								Ball_Y_Motion <= 0;
+								Ball_Y_Pos <= 332;
+							end
+							
+							else if(!going_up && Ball_Y_Pos > 304 && Ball_X_Pos >= 255 && Ball_X_Pos < 295) // >
+							begin
+								Ball_Y_Motion <= 0;
+								Ball_Y_Pos <= 304;
+							end
+							else if (Ball_Y_Pos > 250 && (keycode == 8'h07 || keycode1 == 8'h07) && going_up)
 								Ball_Y_Motion <= -3;
+								
+							
+								
 					
-						// scrolling screen
+				// scrolling screen
 				 if(Ball_X_Pos >= 320 && (keycode == 8'h07 || keycode1 == 8'h07) && logx < 60)
 					begin
 					Ball_X_Motion<= 0;
@@ -170,20 +187,22 @@ module  ball ( input Reset, frame_clk,
 				 
 				 Ball_Y_Pos <= (Ball_Y_Pos + Ball_Y_Motion);  // Update ball position
 				 Ball_X_Pos <= (Ball_X_Pos + Ball_X_Motion);
-			
-			
-	  /**************************************************************************************
-	    ATTENTION! Please answer the following quesiton in your lab report! Points will be allocated for the answers!
-		 Hidden Question #2/2:
-          Note that Ball_Y_Motion in the above statement may have been changed at the same clock edge
-          that is causing the assignment of Ball_Y_pos.  Will the new value of Ball_Y_Motion be used,
-          or the old?  How will this impact behavior of the ball during a bounce, and how might that 
-          interact with a response to a keypress?  Can you fix it?  Give an answer in your Post-Lab.
-      **************************************************************************************/
-      
-			
-		end  
+
+		end 
+		
     end
+	 
+	 always_comb
+	 begin
+	 
+		if (counter[2:0] ==  3'b000 && set_parabola != 0)
+			flag_set <= 1;
+		else
+			flag_set <= 0;
+	 
+	 end
+	 
+	 
        
     assign BallX = Ball_X_Pos;
    
