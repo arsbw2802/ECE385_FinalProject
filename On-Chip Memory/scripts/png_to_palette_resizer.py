@@ -35,6 +35,9 @@ palette_hex = ['0x57b8fa', '0x01030a', '0xffffff', '0x002fa2', '0xcc8a5e', '0x51
 # palette_hex = ['0x371b30' , '0xffffff', '0x714e32', '0x4e392c', '0x6b5336', '0x372923', '0x756149', '0xd3d7da', 
 #                '0xad683f', '0xf2f3f3', '0x7b492e', '0x35383b', '0x6b402a']
 
+#startscreen palette 640x480
+palette_hex = ['0xfffd45', '0x000000', '0x0049a9', '0x5ce2e7', '0xe50607' ]
+
 palette_rgb = [hex_to_rgb(color) for color in palette_hex]
 
 pixel_tree = KDTree(palette_rgb)
