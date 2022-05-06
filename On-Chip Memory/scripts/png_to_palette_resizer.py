@@ -36,7 +36,7 @@ palette_hex = ['0x57b8fa', '0x01030a', '0xffffff', '0x002fa2', '0xcc8a5e', '0x51
 #                '0xad683f', '0xf2f3f3', '0x7b492e', '0x35383b', '0x6b402a']
 
 #startscreen palette 640x480
-# palette_hex = ['0xfffd45', '0x000000', '0x0049a9', '0x5ce2e7', '0xe50607' ]
+palette_hex = ['0xfffd45', '0x000000', '0x0049a9', '0x5ce2e7', '0xe50607' ]
 
 #00a500, 007a00, 005100, '000000', 0xffffff, 0x005800, 0xb2b0b3, ff2a2d, b20000, 880000 , fc7e00, ff7318, dc5000, ccb900, a1a43f, 7d7e7d
 #palette hex for new yoshi?
@@ -44,7 +44,7 @@ palette_hex = ['0x57b8fa', '0x01030a', '0xffffff', '0x002fa2', '0xcc8a5e', '0x51
 
 #color palette for score
 #d20303, f6fb00, dfa400, fde395, d4002e, d32a03, d64100
-palette_hex = ['0xd20303', '0xf6fb00', '0xdfa400', '0xfde395', '0xd4002e', '0xd32a03', '0xd64100', '0xfe06ff']
+# palette_hex = ['0xd20303', '0xf6fb00', '0xdfa400', '0xfde395', '0xd4002e', '0xd32a03', '0xd64100', '0xfe06ff']
 
 palette_rgb = [hex_to_rgb(color) for color in palette_hex]
 
